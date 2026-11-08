@@ -19,6 +19,7 @@
             transition: background-color 0.5s ease, color 0.5s ease;
             background-color: #F6F2E9;
             color: #362D26;
+            overflow: hidden; /* Fullscreen canvas layout */
         }
 
         .font-outfit {
@@ -27,26 +28,27 @@
 
         /* Custom Scrollbars */
         ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+            width: 5px;
+            height: 5px;
         }
         ::-webkit-scrollbar-track {
             background: rgba(0, 0, 0, 0.04);
         }
         ::-webkit-scrollbar-thumb {
-            background: rgba(80, 60, 45, 0.2);
+            background: rgba(80, 60, 45, 0.25);
             border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(80, 60, 45, 0.4);
+            background: rgba(80, 60, 45, 0.45);
         }
 
-        /* Canvas Styling */
+        /* Canvas Fullscreen Styling */
         #simCanvas {
             touch-action: none;
             cursor: crosshair;
-            box-shadow: 0 10px 25px -5px rgba(60, 45, 30, 0.08), 0 8px 10px -6px rgba(60, 45, 30, 0.05);
-            transition: border-color 0.4s ease;
+            display: block;
+            width: 100%;
+            height: 100%;
         }
 
         /* Theme Classes for Dynamic Shifting */
@@ -69,259 +71,218 @@
 
         .card-panel {
             transition: background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
-            background-color: #FFFFFF;
-            border: 1px solid rgba(80, 60, 45, 0.12);
+            background-color: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(80, 60, 45, 0.15);
         }
 
-        .theme-food .card-panel {
-            background-color: #FFFDF7;
-            border-color: rgba(180, 110, 20, 0.2);
+        /* Sidebar Slide Animation */
+        #sidebar {
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .theme-danger .card-panel {
-            background-color: #FFFBFB;
-            border-color: rgba(180, 50, 40, 0.2);
-        }
-        .theme-all .card-panel {
-            background-color: #FAF9F6;
-            border-color: rgba(50, 45, 40, 0.2);
-        }
-
-        /* Range Slider Styling */
-        input[type=range] {
-            accent-color: #6B4E3D;
-        }
-        .theme-food input[type=range] {
-            accent-color: #D97706;
-        }
-        .theme-danger input[type=range] {
-            accent-color: #DC2626;
-        }
-
-        /* Modal Overlay Transition */
-        .modal-backdrop {
-            background-color: rgba(30, 24, 18, 0.65);
-            backdrop-filter: blur(4px);
+        #sidebar.collapsed {
+            transform: translateX(100%);
         }
     </style>
 </head>
-<body class="theme-normal min-h-screen flex flex-col antialiased selection:bg-amber-200">
+<body class="theme-normal w-screen h-screen relative flex flex-col antialiased selection:bg-amber-200">
 
-    <!-- TOP HEADER -->
-    <header class="w-full border-b border-stone-300/60 px-4 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3 bg-white/70 backdrop-blur-md sticky top-0 z-30">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-amber-900/10 flex items-center justify-center text-amber-950 font-bold text-xl border border-amber-900/20">
+    <!-- FULLSCREEN CANVAS BACKGROUND -->
+    <div class="absolute inset-0 z-0 w-full h-full bg-stone-900/5">
+        <canvas id="simCanvas"></canvas>
+    </div>
+
+    <!-- MINIMAL FLOATING TOP BAR (Title + Sidebar Toggle Only) -->
+    <header class="absolute top-3 left-3 right-3 sm:top-4 sm:left-4 sm:right-4 z-20 pointer-events-none flex items-center justify-between gap-3">
+        <!-- Compact Title Badge -->
+        <div class="pointer-events-auto bg-white/90 backdrop-blur-md px-3 py-2 sm:px-4 sm:py-2 rounded-2xl border border-stone-300/80 shadow-md flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-amber-900/10 flex items-center justify-center text-amber-950 font-bold text-base border border-amber-900/20">
                 <i class="fa-solid fa-bugs"></i>
             </div>
             <div>
-                <h1 class="text-lg lg:text-xl font-bold tracking-tight text-stone-900 flex items-center gap-2">
+                <h1 class="text-xs sm:text-sm font-bold text-stone-900 flex items-center gap-2">
                     개미는 지도도, 리더도 없습니다
-                    <span class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-medium border border-amber-300/60 hidden sm:inline-block">자연의 군집 지능</span>
                 </h1>
-                <p class="text-xs text-stone-600 hidden sm:block">페로몬 소멸과 증발이 만들어내는 최적 경로 알고리즘 시뮬레이션</p>
+                <p class="text-[10px] text-stone-500 hidden sm:block">페로몬 소멸과 증발이 만들어내는 최적 경로 알고리즘</p>
             </div>
         </div>
 
-        <!-- Header Actions & Controls -->
-        <div class="flex items-center gap-2">
-            <button id="btnPlayPause" class="px-3.5 py-1.5 rounded-lg bg-stone-900 hover:bg-stone-800 text-amber-50 font-medium text-sm transition flex items-center gap-1.5 shadow-sm">
-                <i class="fa-solid fa-play text-xs" id="playIcon"></i>
-                <span id="playText">시작</span>
-            </button>
-            <button id="btnReset" class="px-3 py-1.5 rounded-lg bg-stone-200/80 hover:bg-stone-300/80 text-stone-800 font-medium text-sm transition flex items-center gap-1">
-                <i class="fa-solid fa-rotate-left text-xs"></i>
-                <span class="hidden sm:inline">리셋</span>
-            </button>
-            <button id="btnClearPheromones" class="px-3 py-1.5 rounded-lg bg-stone-200/80 hover:bg-stone-300/80 text-stone-800 font-medium text-sm transition flex items-center gap-1" title="페로몬만 제거">
-                <i class="fa-solid fa-wind text-xs text-amber-700"></i>
-                <span class="hidden sm:inline">페로몬 지우기</span>
-            </button>
-            <button id="btnHelp" class="w-9 h-9 rounded-lg bg-stone-100 hover:bg-stone-200 border border-stone-300/70 text-stone-700 flex items-center justify-center transition ml-1" title="도움말 다시보기">
+        <!-- Sidebar Toggle & Quick Actions -->
+        <div class="pointer-events-auto flex items-center gap-2">
+            <button id="btnHelp" class="w-9 h-9 rounded-xl bg-white/90 hover:bg-white border border-stone-300/80 text-stone-700 flex items-center justify-center shadow-md transition" title="도움말 다시보기">
                 <i class="fa-solid fa-circle-question text-base"></i>
+            </button>
+            <button id="btnToggleSidebar" class="px-3.5 py-2 rounded-xl bg-amber-900 hover:bg-amber-800 text-amber-50 font-medium text-xs sm:text-sm transition flex items-center gap-1.5 shadow-lg border border-amber-950/30">
+                <i class="fa-solid fa-bars-staggered text-xs"></i>
+                <span id="sidebarToggleLabel">설정 & 도구</span>
             </button>
         </div>
     </header>
 
-    <!-- MAIN CONTAINER -->
-    <main class="flex-1 w-full max-w-7xl mx-auto p-3 sm:p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5">
-
-        <!-- LEFT/CENTER: CANVAS & DRAWING TOOLBAR -->
-        <section class="lg:col-span-7 xl:col-span-8 flex flex-col gap-3">
-            
-            <!-- Tool Selector Toolbar -->
-            <div class="card-panel rounded-2xl p-2.5 flex flex-wrap items-center justify-between gap-2">
-                <div class="flex items-center gap-1 overflow-x-auto py-0.5 w-full sm:w-auto">
-                    <span class="text-xs font-semibold text-stone-500 mr-1 pl-1">배치 도구:</span>
-                    <button data-tool="wall" class="tool-btn active px-3 py-1.5 rounded-lg text-xs font-medium border flex items-center gap-1.5 transition bg-stone-800 text-white border-stone-800">
-                        <i class="fa-solid fa-cubes text-stone-300"></i> 장애물
-                    </button>
-                    <button data-tool="food" class="tool-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-stone-200 text-stone-700 hover:bg-stone-100 flex items-center gap-1.5 transition">
-                        <i class="fa-solid fa-apple-whole text-amber-600"></i> 먹이
-                    </button>
-                    <button data-tool="predator" class="tool-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-stone-200 text-stone-700 hover:bg-stone-100 flex items-center gap-1.5 transition">
-                        <i class="fa-solid fa-spider text-rose-600"></i> 포식자
-                    </button>
-                    <button data-tool="nest" class="tool-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-stone-200 text-stone-700 hover:bg-stone-100 flex items-center gap-1.5 transition">
-                        <i class="fa-solid fa-house-chimney text-emerald-700"></i> 개미집
-                    </button>
-                    <button data-tool="eraser" class="tool-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-stone-200 text-stone-700 hover:bg-stone-100 flex items-center gap-1.5 transition">
-                        <i class="fa-solid fa-eraser text-stone-500"></i> 지우개
-                    </button>
-                </div>
-                
-                <div class="text-xs text-stone-500 flex items-center gap-1.5 pl-1">
-                    <i class="fa-solid fa-hand-pointer text-amber-700/70"></i>
-                    <span>격자를 클릭하거나 드래그하세요</span>
-                </div>
+    <!-- RIGHT COLLAPSIBLE SIDEBAR (ALL TOOLS & CONTROLS MOVED HERE) -->
+    <aside id="sidebar" class="absolute top-0 right-0 bottom-0 z-30 w-80 sm:w-96 card-panel shadow-2xl p-4 sm:p-5 flex flex-col gap-4 overflow-y-auto border-l border-stone-300/80">
+        <!-- Sidebar Header -->
+        <div class="flex items-center justify-between border-b border-stone-200 pb-3">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-amber-900 text-lg"></i>
+                <h2 class="text-base font-bold text-stone-900">시뮬레이션 조작 메뉴</h2>
             </div>
+            <button id="btnCloseSidebar" class="w-8 h-8 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-600 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-base"></i>
+            </button>
+        </div>
 
-            <!-- Canvas Container -->
-            <div class="relative w-full aspect-square max-h-[640px] rounded-2xl overflow-hidden card-panel p-2 flex items-center justify-center">
-                <canvas id="simCanvas" class="rounded-xl w-full h-full block bg-stone-50"></canvas>
+        <!-- 1. Playback & Simulation Execution Controls -->
+        <div class="flex items-center gap-2 bg-stone-100/80 p-2 rounded-2xl border border-stone-200">
+            <button id="btnPlayPause" class="flex-1 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-amber-50 font-medium text-xs sm:text-sm transition flex items-center justify-center gap-1.5 shadow-sm">
+                <i class="fa-solid fa-play text-xs" id="playIcon"></i>
+                <span id="playText">시작</span>
+            </button>
+            <button id="btnReset" class="py-2 px-3 rounded-xl bg-white hover:bg-stone-50 text-stone-800 font-medium text-xs sm:text-sm border border-stone-300/80 transition flex items-center gap-1 shadow-sm">
+                <i class="fa-solid fa-rotate-left text-xs"></i>
+                <span>리셋</span>
+            </button>
+            <button id="btnClearPheromones" class="py-2 px-3 rounded-xl bg-white hover:bg-stone-50 text-stone-800 font-medium text-xs sm:text-sm border border-stone-300/80 transition flex items-center gap-1 shadow-sm" title="페로몬만 지우기">
+                <i class="fa-solid fa-wind text-xs text-amber-700"></i>
+                <span>지우기</span>
+            </button>
+        </div>
 
-                <!-- Tool Hover Badge Overlay -->
-                <div id="toolTipBadge" class="absolute top-4 left-4 pointer-events-none bg-stone-900/80 text-stone-100 text-xs px-2.5 py-1 rounded-md backdrop-blur-sm opacity-0 transition-opacity">
-                    장애물 설치 모드
-                </div>
+        <!-- 2. Placement Tools Palette -->
+        <div class="flex flex-col gap-2 bg-white p-3 rounded-2xl border border-stone-200">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-stone-500">
+                <i class="fa-solid fa-pen-ruler text-stone-700 mr-1"></i> 격자 배치 도구 (클릭/드래그)
+            </h3>
+            <div class="grid grid-cols-2 gap-1.5">
+                <button data-tool="wall" class="tool-btn active p-2 rounded-xl text-xs font-medium border flex items-center gap-2 transition bg-stone-800 text-white border-stone-800">
+                    <i class="fa-solid fa-cubes text-stone-300 w-4 text-center"></i> 장애물
+                </button>
+                <button data-tool="food" class="tool-btn p-2 rounded-xl text-xs font-medium border border-stone-200 text-stone-700 hover:bg-stone-100 flex items-center gap-2 transition">
+                    <i class="fa-solid fa-apple-whole text-amber-600 w-4 text-center"></i> 먹이
+                </button>
+                <button data-tool="predator" class="tool-btn p-2 rounded-xl text-xs font-medium border border-stone-200 text-stone-700 hover:bg-stone-100 flex items-center gap-2 transition">
+                    <i class="fa-solid fa-spider text-rose-600 w-4 text-center"></i> 포식자
+                </button>
+                <button data-tool="nest" class="tool-btn p-2 rounded-xl text-xs font-medium border border-stone-200 text-stone-700 hover:bg-stone-100 flex items-center gap-2 transition">
+                    <i class="fa-solid fa-house-chimney text-emerald-700 w-4 text-center"></i> 개미집
+                </button>
+                <button data-tool="eraser" class="tool-btn col-span-2 p-2 rounded-xl text-xs font-medium border border-stone-200 text-stone-700 hover:bg-stone-100 flex items-center justify-center gap-2 transition">
+                    <i class="fa-solid fa-eraser text-stone-500 w-4 text-center"></i> 지우개
+                </button>
             </div>
+        </div>
 
-            <!-- Current View Mode Status Footer -->
-            <div class="flex items-center justify-between text-xs text-stone-600 px-1">
-                <span id="themeIndicator" class="font-medium flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-stone-700"></span> 일반 보기 모드 (갈색 격자)
-                </span>
-                <span class="text-stone-600">격자 크기: 36 × 36 셀</span>
+        <!-- 3. Visual View Mode Selector -->
+        <div class="flex flex-col gap-2 bg-white p-3 rounded-2xl border border-stone-200">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-stone-500">
+                <i class="fa-solid fa-eye text-stone-700 mr-1"></i> 시각적 보기 모드 (테마)
+            </h3>
+            <div class="grid grid-cols-2 gap-1.5">
+                <button data-view="normal" class="view-btn active-view p-2 rounded-xl text-xs font-bold transition bg-stone-900 text-white border border-stone-800 flex items-center gap-1.5">
+                    <i class="fa-solid fa-vector-square text-amber-400"></i> 일반 보기
+                </button>
+                <button data-view="food" class="view-btn p-2 rounded-xl text-xs font-bold transition border border-stone-200 bg-stone-50 text-stone-800 hover:bg-amber-50/50 flex items-center gap-1.5">
+                    <i class="fa-solid fa-droplet text-amber-500"></i> 먹이 페로몬
+                </button>
+                <button data-view="danger" class="view-btn p-2 rounded-xl text-xs font-bold transition border border-stone-200 bg-stone-50 text-stone-800 hover:bg-rose-50/50 flex items-center gap-1.5">
+                    <i class="fa-solid fa-triangle-exclamation text-rose-500"></i> 위험 페로몬
+                </button>
+                <button data-view="all" class="view-btn p-2 rounded-xl text-xs font-bold transition border border-stone-200 bg-stone-50 text-stone-800 hover:bg-stone-100 flex items-center gap-1.5">
+                    <i class="fa-solid fa-layer-group text-indigo-600"></i> 통합 페로몬
+                </button>
             </div>
-        </section>
+        </div>
 
-        <!-- RIGHT: CONTROL PANEL & ANALYTICS -->
-        <section class="lg:col-span-5 xl:col-span-4 flex flex-col gap-4">
-            
-            <!-- 1. Visual View Mode Selector -->
-            <div class="card-panel rounded-2xl p-4 flex flex-col gap-2.5">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-stone-500 flex items-center justify-between">
-                    <span><i class="fa-solid fa-eye text-stone-700 mr-1"></i> 시각적 보기 모드</span>
-                    <span class="text-[10px] text-amber-900 bg-amber-100 px-1.5 py-0.5 rounded">동적 테마 전환</span>
-                </h3>
-                <div class="grid grid-cols-2 gap-2">
-                    <button data-view="normal" class="view-btn active-view text-left p-2.5 rounded-xl border border-stone-800 bg-stone-900 text-white transition flex flex-col">
-                        <span class="text-xs font-bold flex items-center gap-1">
-                            <i class="fa-solid fa-vector-square text-amber-400"></i> 일반 보기
-                        </span>
-                        <span class="text-[11px] opacity-80 mt-0.5">개미 및 지형 중심</span>
-                    </button>
-                    <button data-view="food" class="view-btn text-left p-2.5 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 hover:bg-amber-50/50 transition flex flex-col">
-                        <span class="text-xs font-bold text-amber-700 flex items-center gap-1">
-                            <i class="fa-solid fa-droplet text-amber-500"></i> 먹이 페로몬
-                        </span>
-                        <span class="text-[11px] text-stone-500 mt-0.5">골드 앰버 히트맵</span>
-                    </button>
-                    <button data-view="danger" class="view-btn text-left p-2.5 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 hover:bg-rose-50/50 transition flex flex-col">
-                        <span class="text-xs font-bold text-rose-700 flex items-center gap-1">
-                            <i class="fa-solid fa-triangle-exclamation text-rose-500"></i> 위험 페로몬
-                        </span>
-                        <span class="text-[11px] text-stone-500 mt-0.5">크림슨 러스트 히트맵</span>
-                    </button>
-                    <button data-view="all" class="view-btn text-left p-2.5 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 hover:bg-stone-100 transition flex flex-col">
-                        <span class="text-xs font-bold text-indigo-900 flex items-center gap-1">
-                            <i class="fa-solid fa-layer-group text-indigo-600"></i> 통합 페로몬
-                        </span>
-                        <span class="text-[11px] text-stone-500 mt-0.5">다색 페로몬 종합</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- 2. Simulation Model Selection -->
-            <div class="card-panel rounded-2xl p-4 flex flex-col gap-2.5">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-stone-500">
-                    <i class="fa-solid fa-sliders text-stone-700 mr-1"></i> 페로몬 시스템 규칙 · 경로 강화형
-                </h3>
-                <div class="flex flex-col gap-2">
-                    <label class="flex items-start gap-2.5 p-2.5 rounded-xl border border-stone-200 hover:bg-stone-50 cursor-pointer transition">
-                        <input type="radio" name="simModel" value="simple" class="mt-0.5 accent-amber-800">
-                        <div>
-                            <div class="text-xs font-bold text-stone-800">먹이 페로몬만 단독 사용 (단순 모델)</div>
-                            <div class="text-[11px] text-stone-500 leading-snug">귀환 개미는 제한된 먹이 페로몬을 남깁니다. 집 냄새 없이 자신의 이동 기억으로 돌아오는 비교 모델입니다.</div>
-                        </div>
-                    </label>
-                    <label class="flex items-start gap-2.5 p-2.5 rounded-xl border border-stone-200 hover:bg-stone-50 cursor-pointer transition">
-                        <input type="radio" name="simModel" value="full" checked class="mt-0.5 accent-amber-800">
-                        <div>
-                            <div class="text-xs font-bold text-stone-800">전체 페로몬 (먹이 + 집 + 위험) 종합 사용</div>
-                            <div class="text-[11px] text-stone-500 leading-snug">운반 개미는 먹이 방향의 길을 남기고, 짧은 경로일수록 강하게 보강합니다. 후속 개미는 강한 길을 따라가며 6%의 정찰 개미가 대안을 찾습니다.</div>
-                        </div>
-                    </label>
-                </div>
-            </div>
-
-            <!-- 3. Sliders Section -->
-            <div class="card-panel rounded-2xl p-4 flex flex-col gap-4">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-stone-500">
-                    <i class="fa-solid fa-gauge-high text-stone-700 mr-1"></i> 시뮬레이션 파라미터
-                </h3>
-
-                <!-- Evaporation Rate Slider -->
-                <div class="flex flex-col gap-1.5">
-                    <div class="flex justify-between items-center text-xs">
-                        <span class="font-medium text-stone-700 flex items-center gap-1">
-                            <i class="fa-solid fa-wind text-amber-700"></i> 페로몬 증발 속도 (Evaporation)
-                        </span>
-                        <span id="evapValue" class="font-outfit font-bold text-amber-900 bg-amber-100/70 px-1.5 py-0.5 rounded">0.020</span>
-                    </div>
-                    <input type="range" id="sliderEvap" min="0.003" max="0.080" step="0.001" value="0.020" class="w-full h-1.5 bg-stone-200 rounded-lg appearance-none cursor-pointer">
-                    <div class="flex justify-between text-[10px] text-stone-600">
-                        <span>천천히 사라짐 (경로 고착)</span>
-                        <span>빠르게 증발 (소멸의 기적)</span>
+        <!-- 4. Real-time Live Analytics Card -->
+        <div class="bg-gradient-to-br from-amber-50/60 to-stone-100/70 p-3 rounded-2xl border border-amber-200/70 flex flex-col gap-2">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-stone-600 flex items-center justify-between">
+                <span><i class="fa-solid fa-chart-line text-amber-900 mr-1"></i> 탐색 성과 실시간 집계</span>
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            </h3>
+            <div class="grid grid-cols-2 gap-2">
+                <div class="bg-white/80 p-2 rounded-xl border border-stone-200/60">
+                    <div class="text-[10px] text-stone-500">수확한 먹이 총량</div>
+                    <div class="text-base font-outfit font-bold text-amber-900 flex items-baseline gap-1">
+                        <span id="statFoodDelivered">0</span>
+                        <span class="text-[10px] font-normal text-stone-600">조각</span>
                     </div>
                 </div>
-
-                <!-- Ant Count Slider -->
-                <div class="flex flex-col gap-1.5">
-                    <div class="flex justify-between items-center text-xs">
-                        <span class="font-medium text-stone-700 flex items-center gap-1">
-                            <i class="fa-solid fa-bug text-stone-700"></i> 개미 개체수
-                        </span>
-                        <span id="antCountValue" class="font-outfit font-bold text-stone-900 bg-stone-200/80 px-1.5 py-0.5 rounded">70마리</span>
-                    </div>
-                    <input type="range" id="sliderAnts" min="10" max="180" step="5" value="70" class="w-full h-1.5 bg-stone-200 rounded-lg appearance-none cursor-pointer">
-                </div>
-
-                <!-- Sim Speed Slider -->
-                <div class="flex flex-col gap-1.5">
-                    <div class="flex justify-between items-center text-xs">
-                        <span class="font-medium text-stone-700 flex items-center gap-1">
-                            <i class="fa-solid fa-bolt text-amber-600"></i> 연산 속도
-                        </span>
-                        <span id="speedValue" class="font-outfit font-bold text-stone-900 bg-stone-200/80 px-1.5 py-0.5 rounded">1.0×</span>
-                    </div>
-                    <input type="range" id="sliderSpeed" min="0.5" max="3.0" step="0.5" value="1.0" class="w-full h-1.5 bg-stone-200 rounded-lg appearance-none cursor-pointer">
-                </div>
-            </div>
-
-            <!-- 4. Real-time Live Analytics Card -->
-            <div class="card-panel rounded-2xl p-4 flex flex-col gap-3 bg-gradient-to-br from-white to-stone-50">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-stone-500 flex items-center justify-between">
-                    <span><i class="fa-solid fa-chart-line text-stone-700 mr-1"></i> 실시간 탐색 성과 · 집 귀환 후 집계</span>
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                </h3>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-stone-100/70 p-3 rounded-xl border border-stone-200/60">
-                        <div class="text-[11px] text-stone-500">수확한 먹이 총량</div>
-                        <div class="text-xl font-outfit font-bold text-amber-900 mt-0.5 flex items-baseline gap-1">
-                            <span id="statFoodDelivered">0</span>
-                            <span class="text-xs font-normal text-stone-600">조각</span>
-                        </div>
-                    </div>
-                    <div class="bg-stone-100/70 p-3 rounded-xl border border-stone-200/60">
-                        <div class="text-[11px] text-stone-500">먹이 운반 개미 비율</div>
-                        <div class="text-xl font-outfit font-bold text-emerald-800 mt-0.5 flex items-baseline gap-1">
-                            <span id="statCarryingRatio">0%</span>
-                        </div>
+                <div class="bg-white/80 p-2 rounded-xl border border-stone-200/60">
+                    <div class="text-[10px] text-stone-500">먹이 운반 비율</div>
+                    <div class="text-base font-outfit font-bold text-emerald-800 flex items-baseline gap-1">
+                        <span id="statCarryingRatio">0%</span>
                     </div>
                 </div>
             </div>
+        </div>
 
-        </section>
-    </main>
+        <!-- 5. Simulation Model Selection -->
+        <div class="flex flex-col gap-2">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-stone-500">
+                <i class="fa-solid fa-diagram-project text-stone-700 mr-1"></i> 페로몬 규칙 설정
+            </h3>
+            <div class="flex flex-col gap-1.5">
+                <label class="flex items-start gap-2 p-2 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 cursor-pointer transition">
+                    <input type="radio" name="simModel" value="simple" class="mt-0.5 accent-amber-800">
+                    <div>
+                        <div class="text-xs font-bold text-stone-800">먹이 페로몬만 단독 사용</div>
+                        <div class="text-[10px] text-stone-500 leading-snug">먹이 냄새로만 탐색하는 비교용 단순 모델</div>
+                    </div>
+                </label>
+                <label class="flex items-start gap-2 p-2 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 cursor-pointer transition">
+                    <input type="radio" name="simModel" value="full" checked class="mt-0.5 accent-amber-800">
+                    <div>
+                        <div class="text-xs font-bold text-stone-800">전체 페로몬 (먹이+집+위험) 종합</div>
+                        <div class="text-[10px] text-stone-500 leading-snug">짧은 길 강화 및 포식자 위험 지역 회피</div>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <!-- 6. Sliders Section -->
+        <div class="flex flex-col gap-3.5 bg-white p-3 rounded-2xl border border-stone-200">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-stone-500">
+                <i class="fa-solid fa-sliders text-stone-700 mr-1"></i> 환경 파라미터 조절
+            </h3>
+
+            <!-- Evaporation Rate Slider -->
+            <div class="flex flex-col gap-1">
+                <div class="flex justify-between items-center text-xs">
+                    <span class="font-medium text-stone-700 flex items-center gap-1">
+                        <i class="fa-solid fa-wind text-amber-700"></i> 페로몬 증발 속도
+                    </span>
+                    <span id="evapValue" class="font-outfit font-bold text-amber-900 bg-amber-100/70 px-1.5 py-0.5 rounded text-[11px]">0.020</span>
+                </div>
+                <input type="range" id="sliderEvap" min="0.003" max="0.080" step="0.001" value="0.020" class="w-full h-1.5 bg-stone-200 rounded-lg appearance-none cursor-pointer">
+                <div class="flex justify-between text-[9px] text-stone-500">
+                    <span>느림 (경로 고착)</span>
+                    <span>빠름 (소멸의 기적)</span>
+                </div>
+            </div>
+
+            <!-- Ant Count Slider -->
+            <div class="flex flex-col gap-1">
+                <div class="flex justify-between items-center text-xs">
+                    <span class="font-medium text-stone-700 flex items-center gap-1">
+                        <i class="fa-solid fa-bug text-stone-700"></i> 개미 개체수
+                    </span>
+                    <span id="antCountValue" class="font-outfit font-bold text-stone-900 bg-stone-200/80 px-1.5 py-0.5 rounded text-[11px]">70마리</span>
+                </div>
+                <input type="range" id="sliderAnts" min="10" max="180" step="5" value="70" class="w-full h-1.5 bg-stone-200 rounded-lg appearance-none cursor-pointer">
+            </div>
+
+            <!-- Sim Speed Slider -->
+            <div class="flex flex-col gap-1">
+                <div class="flex justify-between items-center text-xs">
+                    <span class="font-medium text-stone-700 flex items-center gap-1">
+                        <i class="fa-solid fa-bolt text-amber-600"></i> 시뮬레이션 연산 속도
+                    </span>
+                    <span id="speedValue" class="font-outfit font-bold text-stone-900 bg-stone-200/80 px-1.5 py-0.5 rounded text-[11px]">1.0×</span>
+                </div>
+                <input type="range" id="sliderSpeed" min="0.5" max="3.0" step="0.5" value="1.0" class="w-full h-1.5 bg-stone-200 rounded-lg appearance-none cursor-pointer">
+            </div>
+        </div>
+    </aside>
 
     <!-- TUTORIAL MODAL OVERLAY -->
     <div id="tutorialModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop opacity-100 transition-opacity duration-300">
@@ -363,7 +324,7 @@
             </div>
 
             <div class="flex items-center justify-between pt-2">
-                <span class="text-[11px] text-stone-600">언제든 우측 상단 <i class="fa-solid fa-circle-question"></i> 버튼으로 다시 볼 수 있습니다.</span>
+                <span class="text-[11px] text-stone-600">언제든 상단 <i class="fa-solid fa-circle-question"></i> 버튼으로 다시 볼 수 있습니다.</span>
                 <button id="btnStartSim" class="px-6 py-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-amber-50 font-semibold text-sm transition shadow-lg shadow-stone-900/20 flex items-center gap-2">
                     <span>시작하기</span>
                     <i class="fa-solid fa-arrow-right text-xs"></i>
@@ -377,41 +338,47 @@
         // CONFIG & CONSTANTS
         const GRID_SIZE = 36; // 36x36 Grid
         let cellSize = 16;
+        let offsetX = 0;
+        let offsetY = 0;
 
         // Visual Themes Map
         const THEMES = {
             normal: {
                 className: 'theme-normal',
-                bgCanvas: '#FAF6F0',
-                gridLine: 'rgba(74, 59, 50, 0.22)',
-                gridLineMajor: 'rgba(74, 59, 50, 0.40)',
+                bgCanvas: '#EFECE6',
+                bgGrid: '#FAF6F0',
+                gridLine: 'rgba(74, 59, 50, 0.18)',
+                gridLineMajor: 'rgba(74, 59, 50, 0.35)',
                 wallFill: '#3D312A',
                 wallBorder: '#28201B',
                 label: '일반 보기 모드 (갈색 격자)'
             },
             food: {
                 className: 'theme-food',
-                bgCanvas: '#FFFDF5',
-                gridLine: 'rgba(180, 110, 20, 0.28)',
-                gridLineMajor: 'rgba(180, 110, 20, 0.48)',
+                bgCanvas: '#FAF0E4',
+                bgGrid: '#FFFDF5',
+                gridLine: 'rgba(180, 110, 20, 0.22)',
+                gridLineMajor: 'rgba(180, 110, 20, 0.42)',
                 wallFill: '#4A3B2C',
                 wallBorder: '#33271A',
                 label: '먹이 페로몬 모드 (골드 앰버 테마)'
             },
             danger: {
                 className: 'theme-danger',
-                bgCanvas: '#FFF7F7',
-                gridLine: 'rgba(160, 50, 40, 0.26)',
-                gridLineMajor: 'rgba(160, 50, 40, 0.46)',
+                bgCanvas: '#FAF0EF',
+                bgGrid: '#FFF7F7',
+                gridLine: 'rgba(160, 50, 40, 0.22)',
+                gridLineMajor: 'rgba(160, 50, 40, 0.42)',
                 wallFill: '#4A2A28',
                 wallBorder: '#301817',
                 label: '위험 페로몬 모드 (크림슨 러스트 테마)'
             },
             all: {
                 className: 'theme-all',
-                bgCanvas: '#F7F4EE',
-                gridLine: 'rgba(40, 35, 30, 0.30)',
-                gridLineMajor: 'rgba(40, 35, 30, 0.50)',
+                bgCanvas: '#E8E5DF',
+                bgGrid: '#F7F4EE',
+                gridLine: 'rgba(40, 35, 30, 0.22)',
+                gridLineMajor: 'rgba(40, 35, 30, 0.45)',
                 wallFill: '#332E2B',
                 wallBorder: '#211D1B',
                 label: '통합 페로몬 모드 (디프 스튜디오 테마)'
@@ -436,7 +403,6 @@
 
         // Grid Data Structure
         let grid = [];
-        // Home trails are emitted by ants leaving the nest.
         let nestPos = { x: 5, y: 18 };
         let predators = [{ x: 18, y: 11 }];
         let ants = [];
@@ -490,7 +456,7 @@
             updateNestDistances();
         }
 
-        // Local sensing + individual route memory. No global shortest-path oracle.
+        // Local sensing + individual route memory
         let simulationTick = 0, stepCredit = 0;
         const DIRS = [[1,0],[0,1],[-1,0],[0,-1]];
         function walkable(x,y) {
@@ -499,7 +465,6 @@
         function neighbors(x,y) {
             return DIRS.map(([dx,dy])=>({x:x+dx,y:y+dy,dx,dy})).filter(n=>walkable(n.x,n.y));
         }
-        // Called after terrain edits; deliberately does not paint a global nest field.
         function updateNestDistances() {
             for(let x=0;x<GRID_SIZE;x++) for(let y=0;y<GRID_SIZE;y++) {
                 const c=grid[x][y];
@@ -507,7 +472,6 @@
             }
             if(grid[nestPos.x]) grid[nestPos.x][nestPos.y].nestPhero=10;
         }
-        // Directed trail on each traversable edge: from this cell toward the food.
         function trailAt(x,y,n) {
             return grid[x][y].foodTrail?.[n.x+','+n.y] || 0;
         }
@@ -518,6 +482,7 @@
             c.foodTrail[k]=Math.min(80,(c.foodTrail[k]||0)+amount);
             c.foodPhero=Math.min(10,Math.max(...Object.values(c.foodTrail),0)/5);
         }
+
         class Ant {
             constructor(x,y) {
                 this.x=x;this.y=y;this.prevX=x;this.prevY=y;
@@ -541,7 +506,6 @@
                     this.x=exits[0].x;this.y=exits[0].y;
                 }
                 const c=grid[this.x][this.y];
-                // The returner lays an arrow pointing BACK toward the food it just left.
                 if(this.hasFood && this.returnFrom && this.foodReserve>0) {
                     const amount=Math.min(this.reward,this.foodReserve);
                     reinforce(this.x,this.y,this.returnFrom.x,this.returnFrom.y,amount);
@@ -556,7 +520,6 @@
                 if(!this.hasFood&&c.isFood&&c.foodAmount>0) {
                     c.foodAmount--;c.isFood=c.foodAmount>0;
                     this.hasFood=true;this.state='RETURNING';
-                    // Same total chemical budget: shorter paths get more pheromone per edge.
                     this.reward=180/Math.max(1,this.route.length-1);
                     this.foodReserve=180;this.returnFrom=null;
                 }
@@ -568,7 +531,6 @@
                 if(this.hasFood) {
                     const here=this.route.findIndex(p=>p.x===this.x&&p.y===this.y);
                     if(here>=0)this.route.length=here+1;
-                    // Local shortcuts across adjacent previously visited cells, not a global map.
                     const known=ns.map(n=>({n,i:this.route.findIndex(p=>p.x===n.x&&p.y===n.y)}))
                       .filter(o=>o.i>=0&&o.i<this.route.length-1&&grid[o.n.x][o.n.y].dangerPhero<4)
                       .sort((a,b)=>a.i-b.i);
@@ -602,6 +564,7 @@
                 if(this.hasFood)this.returnFrom=old;else this.remember(this.x,this.y);
             }
         }
+
         function simulationStep() {
             simulationTick++;
             const factor=1-evapRate;
@@ -619,7 +582,6 @@
                 if(c.foodPhero<0.001)c.foodPhero=0;
                 if(c.nestPhero<0.001)c.nestPhero=0;
             }
-            // All sources are applied AFTER evaporation, avoiding update-order asymmetry.
             for(let x=0;x<GRID_SIZE;x++) for(let y=0;y<GRID_SIZE;y++) if(grid[x][y].isPredator) {
                 grid[x][y].dangerPhero=10;
                 for(let dx=-3;dx<=3;dx++) for(let dy=-3;dy<=3;dy++) {
@@ -631,11 +593,13 @@
             grid[nestPos.x][nestPos.y].nestPhero=10;
             ants.forEach(a=>a.update());
         }
+
         function updateSimulation() {
             stepCredit+=simSpeedMult;
             while(stepCredit>=1) {simulationStep();stepCredit--;}
             syncAntCount(); updateStatsUI();
         }
+
         function syncAntCount() {
             while (ants.length < antTargetCount) {
                 ants.push(new Ant(nestPos.x, nestPos.y));
@@ -655,21 +619,26 @@
             if (ratioEl) ratioEl.textContent = `${ratio}%`;
         }
 
-        // CANVAS RENDER ENGINE
+        // CANVAS RENDER ENGINE WITH STRICT SQUARE CELLS & CENTERED OFFSET
         function render() {
             if (!ctx || !canvas) return;
             const theme = THEMES[currentViewMode] || THEMES.normal;
 
-            // Clear Canvas Background
+            // Clear Outer Canvas Background
             ctx.fillStyle = theme.bgCanvas;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Draw Pheromones (Heatmap overlay)
+            // Draw Centered Inner Grid Background (SQUARE)
+            const gridPixelSize = GRID_SIZE * cellSize;
+            ctx.fillStyle = theme.bgGrid;
+            ctx.fillRect(offsetX, offsetY, gridPixelSize, gridPixelSize);
+
+            // Draw Pheromones (Heatmap overlay) inside grid bounds
             for (let x = 0; x < GRID_SIZE; x++) {
                 for (let y = 0; y < GRID_SIZE; y++) {
                     const cell = grid[x][y];
-                    const px = x * cellSize;
-                    const py = y * cellSize;
+                    const px = offsetX + x * cellSize;
+                    const py = offsetY + y * cellSize;
 
                     // Food Pheromone
                     if ((currentViewMode === 'food' || currentViewMode === 'all' || currentViewMode === 'normal') && cell.foodPhero > 0.05) {
@@ -700,22 +669,23 @@
                     const entries=Object.entries(grid[x][y].foodTrail||{}).sort((a,b)=>b[1]-a[1]);
                     if(!entries.length||entries[0][1]<0.5)continue;
                     const [tx,ty]=entries[0][0].split(',').map(Number),dx=tx-x,dy=ty-y;
-                    const px=(x+0.5)*cellSize,py=(y+0.5)*cellSize,r=cellSize*0.3;
+                    const px=offsetX+(x+0.5)*cellSize,py=offsetY+(y+0.5)*cellSize,r=cellSize*0.3;
                     ctx.beginPath();ctx.moveTo(px-dx*r,py-dy*r);ctx.lineTo(px+dx*r,py+dy*r);
                     ctx.moveTo(px+dx*r-dx*r*.6+dy*r*.5,py+dy*r-dy*r*.6-dx*r*.5);
                     ctx.lineTo(px+dx*r,py+dy*r);
                     ctx.lineTo(px+dx*r-dx*r*.6-dy*r*.5,py+dy*r-dy*r*.6+dx*r*.5);ctx.stroke();
                 }
             }
-            // Draw Grid Lines
+
+            // Draw Grid Lines (Strictly Square)
             ctx.lineWidth = 1;
             for (let i = 0; i <= GRID_SIZE; i++) {
                 ctx.beginPath();
                 ctx.strokeStyle = (i % 6 === 0) ? theme.gridLineMajor : theme.gridLine;
-                ctx.moveTo(i * cellSize, 0);
-                ctx.lineTo(i * cellSize, canvas.height);
-                ctx.moveTo(0, i * cellSize);
-                ctx.lineTo(canvas.width, i * cellSize);
+                ctx.moveTo(offsetX + i * cellSize, offsetY);
+                ctx.lineTo(offsetX + i * cellSize, offsetY + gridPixelSize);
+                ctx.moveTo(offsetX, offsetY + i * cellSize);
+                ctx.lineTo(offsetX + gridPixelSize, offsetY + i * cellSize);
                 ctx.stroke();
             }
 
@@ -723,8 +693,8 @@
             for (let x = 0; x < GRID_SIZE; x++) {
                 for (let y = 0; y < GRID_SIZE; y++) {
                     const cell = grid[x][y];
-                    const px = x * cellSize;
-                    const py = y * cellSize;
+                    const px = offsetX + x * cellSize;
+                    const py = offsetY + y * cellSize;
 
                     if (cell.isWall) {
                         ctx.fillStyle = theme.wallFill;
@@ -760,8 +730,8 @@
 
             // Draw Ants
             ants.forEach(ant => {
-                const ax = (ant.x + 0.5) * cellSize;
-                const ay = (ant.y + 0.5) * cellSize;
+                const ax = offsetX + (ant.x + 0.5) * cellSize;
+                const ay = offsetY + (ant.y + 0.5) * cellSize;
 
                 ctx.save();
                 ctx.translate(ax, ay);
@@ -770,7 +740,6 @@
                 const antSize = Math.max(2.5, cellSize * 0.35);
 
                 if (ant.hasFood) {
-                    // Food particle
                     ctx.fillStyle = '#F59E0B';
                     ctx.beginPath();
                     ctx.arc(antSize * 0.8, 0, antSize * 0.5, 0, Math.PI * 2);
@@ -781,7 +750,6 @@
                     ctx.fillStyle = '#292524';
                 }
 
-                // Abdomen, Thorax, Head
                 ctx.beginPath();
                 ctx.arc(-antSize * 0.6, 0, antSize * 0.5, 0, Math.PI * 2);
                 ctx.arc(0, 0, antSize * 0.35, 0, Math.PI * 2);
@@ -793,28 +761,33 @@
         }
 
         // MAIN ANIMATION LOOP
-        let lastFrame=null, timeCredit=0;
+        let lastFrame = null, timeCredit = 0;
         function mainLoop(now) {
-            const elapsed=lastFrame===null?0:Math.min(100,now-lastFrame);
-            lastFrame=now;
-            if(isRunning) {
-                timeCredit+=elapsed;
-                while(timeCredit>=1000/30) {updateSimulation();timeCredit-=1000/30;}
-            } else timeCredit=0;
+            const elapsed = lastFrame === null ? 0 : Math.min(100, now - lastFrame);
+            lastFrame = now;
+            if (isRunning) {
+                timeCredit += elapsed;
+                while (timeCredit >= 1000 / 30) { updateSimulation(); timeCredit -= 1000 / 30; }
+            } else timeCredit = 0;
             render();
             animationFrameId = requestAnimationFrame(mainLoop);
         }
 
-        // CONVERT MOUSE/TOUCH EVENT TO GRID COORDS
+        // PRECISE MOUSE/TOUCH TO GRID COORDS MAPPING WITH CENTERED OFFSET
         function getGridPos(e) {
             const rect = canvas.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            const x = Math.floor((clientX - rect.left) / cellSize);
-            const y = Math.floor((clientY - rect.top) / cellSize);
+
+            const canvasX = clientX - rect.left;
+            const canvasY = clientY - rect.top;
+
+            const gx = Math.floor((canvasX - offsetX) / cellSize);
+            const gy = Math.floor((canvasY - offsetY) / cellSize);
+
             return {
-                x: Math.max(0, Math.min(GRID_SIZE - 1, x)),
-                y: Math.max(0, Math.min(GRID_SIZE - 1, y))
+                x: Math.max(0, Math.min(GRID_SIZE - 1, gx)),
+                y: Math.max(0, Math.min(GRID_SIZE - 1, gy))
             };
         }
 
@@ -870,17 +843,47 @@
             render();
         }
 
-        // CANVAS RESIZE HANDLER
+        // DYNAMIC FULLSCREEN CANVAS RESIZE HANDLER (FORCE SQUARE CELLS)
         function setupCanvasSize() {
-            const container = canvas.parentElement;
-            if (!container) return;
-            const size = Math.min(container.clientWidth - 16, container.clientHeight - 16);
-            if (size > 0) {
-                canvas.width = size;
-                canvas.height = size;
-                cellSize = size / GRID_SIZE;
-                render();
+            if (!canvas) return;
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+
+            canvas.width = w;
+            canvas.height = h;
+
+            // Ensure cells remain strictly SQUARE
+            const padding = 16;
+            const availWidth = w - padding * 2;
+            const availHeight = h - padding * 2;
+
+            cellSize = Math.max(8, Math.floor(Math.min(availWidth, availHeight) / GRID_SIZE));
+
+            // Calculate centering offsets
+            offsetX = Math.floor((w - GRID_SIZE * cellSize) / 2);
+            offsetY = Math.floor((h - GRID_SIZE * cellSize) / 2);
+
+            render();
+        }
+
+        // SIDEBAR TOGGLE LOGIC
+        function toggleSidebar(forceState) {
+            const sidebar = document.getElementById('sidebar');
+            const toggleLabel = document.getElementById('sidebarToggleLabel');
+            if (!sidebar) return;
+
+            const isCurrentlyCollapsed = sidebar.classList.contains('collapsed');
+            const shouldCollapse = forceState !== undefined ? forceState : !isCurrentlyCollapsed;
+
+            if (shouldCollapse) {
+                sidebar.classList.add('collapsed');
+                if (toggleLabel) toggleLabel.textContent = '설정 & 도구';
+            } else {
+                sidebar.classList.remove('collapsed');
+                if (toggleLabel) toggleLabel.textContent = '닫기';
             }
+
+            setTimeout(setupCanvasSize, 360);
         }
 
         // INITIALIZE ALL EVENT LISTENERS
@@ -920,7 +923,7 @@
 
             window.addEventListener('touchend', () => { isMouseDown = false; });
 
-            // HEADER CONTROLS
+            // HEADER & SIDEBAR CONTROLS
             const btnPlayPause = document.getElementById('btnPlayPause');
             const playIcon = document.getElementById('playIcon');
             const playText = document.getElementById('playText');
@@ -969,17 +972,12 @@
                 }
             });
 
+            // SIDEBAR TOGGLE EVENT LISTENERS
+            document.getElementById('btnToggleSidebar').addEventListener('click', () => toggleSidebar());
+            document.getElementById('btnCloseSidebar').addEventListener('click', () => toggleSidebar(true));
+
             // TOOL SELECTION BUTTONS
             const toolBtns = document.querySelectorAll('.tool-btn');
-            const toolTipBadge = document.getElementById('toolTipBadge');
-            const toolNames = {
-                wall: '장애물 설치 모드',
-                food: '먹이 배치 모드',
-                predator: '포식자 배치 모드',
-                nest: '개미집 위치 변경 모드',
-                eraser: '지우개 모드'
-            };
-
             toolBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
                     toolBtns.forEach(b => {
@@ -990,18 +988,11 @@
                     btn.classList.remove('border-stone-200', 'text-stone-700', 'hover:bg-stone-100');
 
                     activeTool = btn.dataset.tool;
-
-                    if (toolTipBadge) {
-                        toolTipBadge.textContent = toolNames[activeTool] || '';
-                        toolTipBadge.classList.remove('opacity-0');
-                        setTimeout(() => toolTipBadge.classList.add('opacity-0'), 2000);
-                    }
                 });
             });
 
             // VIEW MODE SWITCHING & THEME SHIFT
             const viewBtns = document.querySelectorAll('.view-btn');
-            const themeIndicator = document.getElementById('themeIndicator');
 
             viewBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -1014,10 +1005,7 @@
 
                     currentViewMode = btn.dataset.view;
 
-                    document.body.className = `${THEMES[currentViewMode].className} min-h-screen flex flex-col antialiased selection:bg-amber-200`;
-                    if (themeIndicator) {
-                        themeIndicator.innerHTML = `<span class="w-2 h-2 rounded-full bg-stone-700"></span> ${THEMES[currentViewMode].label}`;
-                    }
+                    document.body.className = `${THEMES[currentViewMode].className} w-screen h-screen relative flex flex-col antialiased selection:bg-amber-200`;
 
                     render();
                 });
@@ -1064,6 +1052,11 @@
             syncAntCount();
             setupCanvasSize();
             initEventListeners();
+
+            // Default sidebar open on desktop
+            if (window.innerWidth < 768) {
+                toggleSidebar(true);
+            }
 
             requestAnimationFrame(mainLoop);
         });
