@@ -109,6 +109,10 @@
 
         <!-- Sidebar Toggle & Quick Actions -->
         <div class="pointer-events-auto flex items-center gap-2">
+            <button id="btnFeedback" class="px-3 py-2 rounded-xl bg-white/95 hover:bg-amber-50 border border-amber-800/30 text-amber-950 font-semibold text-xs sm:text-sm flex items-center gap-1.5 shadow-md transition" title="체험 소감 및 피드백 남기기">
+                <i class="fa-solid fa-comment-dots text-amber-700"></i>
+                <span class="hidden md:inline">피드백 보내기</span>
+            </button>
             <button id="btnHelp" class="w-9 h-9 rounded-xl bg-white/90 hover:bg-white border border-stone-300/80 text-stone-700 flex items-center justify-center shadow-md transition" title="도움말 다시보기">
                 <i class="fa-solid fa-circle-question text-base"></i>
             </button>
@@ -286,49 +290,125 @@
 
     <!-- TUTORIAL MODAL OVERLAY -->
     <div id="tutorialModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop opacity-100 transition-opacity duration-300">
-        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-stone-300 flex flex-col gap-5 transform scale-100 transition-transform">
+        <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-stone-300 flex flex-col gap-4 max-h-[90vh] overflow-y-auto transform scale-100 transition-transform">
             
             <div class="flex items-start justify-between border-b border-stone-100 pb-3">
                 <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center text-2xl font-bold border border-amber-200">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center text-2xl font-bold border border-amber-200 shrink-0">
                         <i class="fa-solid fa-compass-drafting"></i>
                     </div>
                     <div>
                         <span class="text-xs font-semibold text-amber-800 uppercase tracking-wide">과학 커뮤니케이션 대화형 모델</span>
                         <h2 class="text-lg sm:text-xl font-bold text-stone-900 leading-tight">
-                            개미는 지도도, 리더도 없습니다
+                            다익스트라 알고리즘 vs 개미의 군집 지능
                         </h2>
                     </div>
                 </div>
             </div>
 
-            <div class="flex flex-col gap-3.5 text-xs sm:text-sm text-stone-700 leading-relaxed">
-                <p class="font-medium text-stone-900">
-                    시행착오와 페로몬의 소멸(증발)이 어떻게 집단의 먹이 탐색 경로를 만들어내는지 직접 확인해 보세요.
-                </p>
+            <div class="flex flex-col gap-3 text-xs sm:text-sm text-stone-700 leading-relaxed">
+                <!-- Dijkstra Explanation Box -->
+                <div class="bg-stone-100/90 p-3.5 rounded-2xl border border-stone-200/90 flex flex-col gap-1.5">
+                    <div class="font-bold text-stone-900 flex items-center gap-1.5 text-xs sm:text-sm">
+                        <i class="fa-solid fa-route text-amber-800"></i>
+                        <span>왜 '다익스트라(Dijkstra) 알고리즘'이 나올까요?</span>
+                    </div>
+                    <p class="text-xs text-stone-700 leading-relaxed">
+                        우리가 매일 쓰는 내비게이션은 <strong>다익스트라 알고리즘</strong>을 사용합니다. 이는 <strong>전체 지도를 한눈에 내려다보며 모든 갈림길의 거리를 일일이 계산해</strong> 단 하나의 완벽한 최단 경로를 찾아내는 컴퓨터 과학의 대표적 최적화 기법입니다.
+                    </p>
+                    <p class="text-xs text-amber-950 font-medium bg-amber-100/60 px-2.5 py-1.5 rounded-lg mt-0.5">
+                        💡 그렇다면 전체 지도도, 중앙 통제자도 없는 자연 속 작은 개미들은 어떻게 최단 경로를 찾을까요?
+                    </p>
+                </div>
 
-                <div class="space-y-2.5 bg-amber-50/60 p-4 rounded-2xl border border-amber-200/60">
+                <div class="space-y-2 bg-amber-50/60 p-3.5 rounded-2xl border border-amber-200/60 text-xs">
                     <div class="flex items-start gap-2.5">
-                        <div class="w-5 h-5 rounded-full bg-amber-200 text-amber-900 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</div>
-                        <p><strong>시각의 한계 극복:</strong> 개미는 눈이 거의 멀었지만, 이동하며 '화학 물질(페로몬)'을 땅에 남겨 길을 찾습니다.</p>
+                        <div class="w-5 h-5 rounded-full bg-amber-200 text-amber-900 flex items-center justify-center text-[11px] font-bold shrink-0 mt-0.5">1</div>
+                        <p><strong>국소적 소통 (페로몬):</strong> 개미는 전체 지도를 계산하는 대신, 지나간 자리에 화학 물질(페로몬)을 남겨 동료와 소통합니다.</p>
                     </div>
                     <div class="flex items-start gap-2.5">
-                        <div class="w-5 h-5 rounded-full bg-amber-200 text-amber-900 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</div>
-                        <p><strong>증발(Evaporation)의 기적:</strong> 돌아오는 데 시간이 오래 걸리는 멀리 돌아가는 길은 페로몬이 증발하여 사라지고, 빠른 길만 남아 스스로 최적화됩니다.</p>
+                        <div class="w-5 h-5 rounded-full bg-amber-200 text-amber-900 flex items-center justify-center text-[11px] font-bold shrink-0 mt-0.5">2</div>
+                        <p><strong>증발(Evaporation)의 지혜:</strong> 멀리 돌아가는 비효율적인 길은 페로몬이 먼저 증발해 사라지고, 빠른 지름길에만 흔적이 짙게 남아 스스로 최단 경로가 완성됩니다.</p>
                     </div>
                     <div class="flex items-start gap-2.5">
-                        <div class="w-5 h-5 rounded-full bg-amber-200 text-amber-900 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</div>
-                        <p><strong>인터랙티브 실험:</strong> 마우스로 <strong>장애물</strong>과 <strong>포식자</strong>를 직접 배치해 보고, <strong>증발 속도 슬라이더</strong>를 움직여 최적화 경로의 변화를 관찰하세요.</p>
+                        <div class="w-5 h-5 rounded-full bg-amber-200 text-amber-900 flex items-center justify-center text-[11px] font-bold shrink-0 mt-0.5">3</div>
+                        <p><strong>직접 실험하기:</strong> 화면에 <strong>장애물</strong>이나 <strong>포식자</strong>를 그려 길을 막아보며, 실패와 수정을 거쳐 새로운 경로가 열리는 과정을 체험해 보세요!</p>
                     </div>
                 </div>
             </div>
 
-            <div class="flex items-center justify-between pt-2">
-                <span class="text-[11px] text-stone-600">언제든 상단 <i class="fa-solid fa-circle-question"></i> 버튼으로 다시 볼 수 있습니다.</span>
-                <button id="btnStartSim" class="px-6 py-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-amber-50 font-semibold text-sm transition shadow-lg shadow-stone-900/20 flex items-center gap-2">
-                    <span>시작하기</span>
+            <div class="flex items-center justify-between pt-1">
+                <span class="text-[11px] text-stone-600">체험 후 상단 <strong>[피드백 보내기]</strong>로 소감을 남겨주세요!</span>
+                <button id="btnStartSim" class="px-6 py-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-amber-50 font-semibold text-sm transition shadow-lg shadow-stone-900/20 flex items-center gap-2 shrink-0">
+                    <span>시뮬레이션 시작</span>
                     <i class="fa-solid fa-arrow-right text-xs"></i>
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCIENCE COMMUNICATION FEEDBACK MODAL -->
+    <div id="feedbackModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-stone-300 flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-stone-100 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center text-lg border border-amber-200">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base sm:text-lg font-bold text-stone-900">과학 커뮤니케이션 피드백 & 메시지</h2>
+                        <p class="text-xs text-stone-500">체험을 통해 느낀 점이나 제작자에게 전할 메시지를 남겨주세요</p>
+                    </div>
+                </div>
+                <button id="btnCloseFeedback" class="w-8 h-8 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-600 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="feedbackForm" class="flex flex-col gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-stone-700 mb-1">1. 알고리즘 원리가 직관적으로 이해되었나요?</label>
+                    <div class="grid grid-cols-3 gap-2" id="ratingGroup">
+                        <button type="button" data-rating="매우 흥미롭고 쉬웠어요" class="rating-btn py-2 px-2 rounded-xl border border-amber-700 bg-amber-50 text-amber-950 text-xs font-semibold transition">🤩 매우 쉬웠어요</button>
+                        <button type="button" data-rating="어느 정도 이해됐어요" class="rating-btn py-2 px-2 rounded-xl border border-stone-200 bg-stone-50 text-stone-700 text-xs font-medium hover:bg-stone-100 transition">🙂 이해됐어요</button>
+                        <button type="button" data-rating="조금 더 설명이 필요해요" class="rating-btn py-2 px-2 rounded-xl border border-stone-200 bg-stone-50 text-stone-700 text-xs font-medium hover:bg-stone-100 transition">🤔 조금 어려워요</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="feedbackSender" class="block text-xs font-bold text-stone-700 mb-1">2. 작성자 (닉네임 또는 전공/학번)</label>
+                    <input type="text" id="feedbackSender" placeholder="예: 익명의 관람객 / 컴퓨터공학과" class="w-full px-3 py-2 rounded-xl border border-stone-300 text-xs focus:outline-none focus:border-amber-800 bg-stone-50/50">
+                </div>
+
+                <div>
+                    <label for="feedbackMessage" class="block text-xs font-bold text-stone-700 mb-1">3. 제작자에게 보내는 메시지 & 깨달은 점</label>
+                    <textarea id="feedbackMessage" rows="3" required placeholder="예: 장애물로 길을 막았을 때 개미들이 페로몬 증발을 통해 새 길을 찾는 모습이 인상적이었습니다!" class="w-full px-3 py-2 rounded-xl border border-stone-300 text-xs focus:outline-none focus:border-amber-800 bg-stone-50/50 resize-none"></textarea>
+                </div>
+
+                <div class="flex items-center gap-2 pt-1">
+                    <button type="submit" class="flex-1 py-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-amber-50 font-semibold text-xs sm:text-sm transition shadow-md flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-check"></i>
+                        <span>메시지 등록하기</span>
+                    </button>
+                    <button type="button" id="btnCopyFeedbacks" class="py-2.5 px-3 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-semibold text-xs transition flex items-center gap-1" title="수집된 피드백 전체 복사">
+                        <i class="fa-solid fa-copy"></i>
+                        <span>기록 복사</span>
+                    </button>
+                </div>
+                <div id="feedbackToast" class="hidden text-center text-xs font-medium text-emerald-800 bg-emerald-50 border border-emerald-200 py-1.5 px-3 rounded-xl">
+                    메시지가 성공적으로 기록되었습니다! 소중한 의견 감사합니다.
+                </div>
+            </form>
+
+            <!-- Collected Messages List -->
+            <div class="flex flex-col gap-2 border-t border-stone-100 pt-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-stone-600"><i class="fa-solid fa-comments text-amber-800 mr-1"></i> 참여자 소통 보드 (<span id="feedbackCount">0</span>)</span>
+                    <span class="text-[10px] text-stone-400">브라우저에 자동 저장됩니다</span>
+                </div>
+                <div id="feedbackList" class="flex flex-col gap-2 max-h-36 overflow-y-auto pr-1">
+                    <!-- Dynamic feedback items -->
+                </div>
             </div>
         </div>
     </div>
@@ -341,7 +421,7 @@
         let offsetX = 0;
         let offsetY = 0;
 
-        // Visual Themes Map
+        // Visual Themes Map (Distinct Cool Slate Walls vs Warm Gold/Amber Pheromones)
         const THEMES = {
             normal: {
                 className: 'theme-normal',
@@ -349,8 +429,9 @@
                 bgGrid: '#FAF6F0',
                 gridLine: 'rgba(74, 59, 50, 0.18)',
                 gridLineMajor: 'rgba(74, 59, 50, 0.35)',
-                wallFill: '#3D312A',
-                wallBorder: '#28201B',
+                wallFill: '#2B3036',
+                wallBorder: '#1A1E22',
+                wallHatch: 'rgba(255, 255, 255, 0.12)',
                 label: '일반 보기 모드 (갈색 격자)'
             },
             food: {
@@ -359,8 +440,9 @@
                 bgGrid: '#FFFDF5',
                 gridLine: 'rgba(180, 110, 20, 0.22)',
                 gridLineMajor: 'rgba(180, 110, 20, 0.42)',
-                wallFill: '#4A3B2C',
-                wallBorder: '#33271A',
+                wallFill: '#28313B',
+                wallBorder: '#161C22',
+                wallHatch: 'rgba(255, 255, 255, 0.14)',
                 label: '먹이 페로몬 모드 (골드 앰버 테마)'
             },
             danger: {
@@ -369,8 +451,9 @@
                 bgGrid: '#FFF7F7',
                 gridLine: 'rgba(160, 50, 40, 0.22)',
                 gridLineMajor: 'rgba(160, 50, 40, 0.42)',
-                wallFill: '#4A2A28',
-                wallBorder: '#301817',
+                wallFill: '#2B3036',
+                wallBorder: '#1A1E22',
+                wallHatch: 'rgba(255, 255, 255, 0.12)',
                 label: '위험 페로몬 모드 (크림슨 러스트 테마)'
             },
             all: {
@@ -379,8 +462,9 @@
                 bgGrid: '#F7F4EE',
                 gridLine: 'rgba(40, 35, 30, 0.22)',
                 gridLineMajor: 'rgba(40, 35, 30, 0.45)',
-                wallFill: '#332E2B',
-                wallBorder: '#211D1B',
+                wallFill: '#24292E',
+                wallBorder: '#121518',
+                wallHatch: 'rgba(255, 255, 255, 0.14)',
                 label: '통합 페로몬 모드 (디프 스튜디오 테마)'
             }
         };
@@ -640,24 +724,24 @@
                     const px = offsetX + x * cellSize;
                     const py = offsetY + y * cellSize;
 
-                    // Food Pheromone
+                    // Food Pheromone (Bright Golden-Amber clearly separated from Slate Walls)
                     if ((currentViewMode === 'food' || currentViewMode === 'all' || currentViewMode === 'normal') && cell.foodPhero > 0.05) {
-                        const alpha = Math.min(0.85, cell.foodPhero / 8.0);
-                        ctx.fillStyle = `rgba(217, 119, 6, ${alpha})`;
+                        const alpha = Math.min(0.68, cell.foodPhero / 10.5);
+                        ctx.fillStyle = `rgba(245, 158, 11, ${alpha})`;
                         ctx.fillRect(px, py, cellSize, cellSize);
                     }
 
                     // Danger Pheromone
                     if ((currentViewMode === 'danger' || currentViewMode === 'all') && cell.dangerPhero > 0.05) {
-                        const alpha = Math.min(0.75, cell.dangerPhero / 8.0);
-                        ctx.fillStyle = `rgba(220, 38, 38, ${alpha})`;
+                        const alpha = Math.min(0.65, cell.dangerPhero / 9.5);
+                        ctx.fillStyle = `rgba(225, 29, 72, ${alpha})`;
                         ctx.fillRect(px, py, cellSize, cellSize);
                     }
 
                     // Nest Pheromone
                     if (currentSimModel === 'full' && currentViewMode === 'all' && cell.nestPhero > 0.5) {
-                        const alpha = Math.min(0.3, cell.nestPhero / 15.0);
-                        ctx.fillStyle = `rgba(16, 185, 129, ${alpha})`;
+                        const alpha = Math.min(0.28, cell.nestPhero / 16.0);
+                        ctx.fillStyle = `rgba(14, 165, 233, ${alpha})`;
                         ctx.fillRect(px, py, cellSize, cellSize);
                     }
                 }
@@ -700,13 +784,24 @@
                         ctx.fillStyle = theme.wallFill;
                         ctx.fillRect(px + 1, py + 1, cellSize - 2, cellSize - 2);
                         ctx.strokeStyle = theme.wallBorder;
+                        ctx.lineWidth = 1;
                         ctx.strokeRect(px + 1, py + 1, cellSize - 2, cellSize - 2);
+
+                        // Subtle diagonal hatch texture so walls never look like dark pheromone smudges
+                        ctx.strokeStyle = theme.wallHatch;
+                        ctx.beginPath();
+                        ctx.moveTo(px + 3, py + cellSize - 3);
+                        ctx.lineTo(px + cellSize - 3, py + 3);
+                        ctx.stroke();
                     } else if (cell.isFood) {
-                        ctx.fillStyle = '#D97706';
+                        ctx.fillStyle = '#EA580C';
                         const radius = Math.max(3, (cellSize / 2) * Math.min(1, cell.foodAmount / 300));
                         ctx.beginPath();
                         ctx.arc(px + cellSize / 2, py + cellSize / 2, radius, 0, Math.PI * 2);
                         ctx.fill();
+                        ctx.strokeStyle = '#FFFBEB';
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
                     } else if (cell.isPredator) {
                         ctx.fillStyle = '#DC2626';
                         ctx.beginPath();
@@ -970,6 +1065,115 @@
                 if (!isRunning) {
                     btnPlayPause.click();
                 }
+            });
+
+            // FEEDBACK MODAL & COMMUNICATION BOARD LOGIC
+            const feedbackModal = document.getElementById('feedbackModal');
+            const feedbackListEl = document.getElementById('feedbackList');
+            const feedbackCountEl = document.getElementById('feedbackCount');
+            const feedbackToast = document.getElementById('feedbackToast');
+            let selectedRating = '매우 흥미롭고 쉬웠어요';
+
+            const STORAGE_KEY = 'ant_scicomm_feedbacks_v1';
+            function loadFeedbacks() {
+                try {
+                    const saved = localStorage.getItem(STORAGE_KEY);
+                    if (saved) return JSON.parse(saved);
+                } catch (e) {}
+                return [
+                    {
+                        sender: '과학커뮤니케이터 (제작자)',
+                        rating: '안내 메시지',
+                        message: '장애물로 길을 막았을 때 개미들이 어떻게 새로운 최단 경로를 찾아내는지 실험해 보시고 소감을 남겨주세요!',
+                        time: '기본 안내'
+                    }
+                ];
+            }
+
+            function renderFeedbacks() {
+                const items = loadFeedbacks();
+                feedbackCountEl.textContent = items.length;
+                feedbackListEl.innerHTML = items.map(item => `
+                    <div class="bg-stone-50 p-2.5 rounded-xl border border-stone-200/80 text-xs flex flex-col gap-1">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-stone-800">${escapeHtml(item.sender)}</span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 font-medium">${escapeHtml(item.rating)}</span>
+                        </div>
+                        <p class="text-stone-700 leading-snug">${escapeHtml(item.message)}</p>
+                        <span class="text-[10px] text-stone-400 self-end">${escapeHtml(item.time)}</span>
+                    </div>
+                `).join('');
+            }
+
+            function escapeHtml(str) {
+                return String(str).replace(/[&<>"']/g, m => ({
+                    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+                }[m]));
+            }
+
+            document.getElementById('btnFeedback').addEventListener('click', () => {
+                renderFeedbacks();
+                feedbackModal.classList.remove('pointer-events-none', 'opacity-0');
+                feedbackModal.classList.add('opacity-100');
+            });
+
+            document.getElementById('btnCloseFeedback').addEventListener('click', () => {
+                feedbackModal.classList.add('pointer-events-none', 'opacity-0');
+                feedbackModal.classList.remove('opacity-100');
+            });
+
+            document.querySelectorAll('.rating-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.rating-btn').forEach(b => {
+                        b.classList.remove('border-amber-700', 'bg-amber-50', 'text-amber-950', 'font-semibold');
+                        b.classList.add('border-stone-200', 'bg-stone-50', 'text-stone-700', 'font-medium');
+                    });
+                    btn.classList.add('border-amber-700', 'bg-amber-50', 'text-amber-950', 'font-semibold');
+                    btn.classList.remove('border-stone-200', 'bg-stone-50', 'text-stone-700', 'font-medium');
+                    selectedRating = btn.dataset.rating;
+                });
+            });
+
+            document.getElementById('feedbackForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const senderInput = document.getElementById('feedbackSender');
+                const messageInput = document.getElementById('feedbackMessage');
+                const msg = messageInput.value.trim();
+                if (!msg) return;
+
+                const sender = senderInput.value.trim() || '익명의 참여자';
+                const now = new Date();
+                const timeStr = `${now.getMonth() + 1}/${now.getDate()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+                const items = loadFeedbacks();
+                items.unshift({ sender, rating: selectedRating, message: msg, time: timeStr });
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+                } catch (err) {}
+
+                messageInput.value = '';
+                renderFeedbacks();
+
+                feedbackToast.classList.remove('hidden');
+                setTimeout(() => feedbackToast.classList.add('hidden'), 3000);
+            });
+
+            document.getElementById('btnCopyFeedbacks').addEventListener('click', () => {
+                const items = loadFeedbacks();
+                const text = items.map(i => `[${i.rating}] ${i.sender} (${i.time}): ${i.message}`).join('\n');
+                const tempInput = document.createElement('textarea');
+                tempInput.value = text;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+
+                feedbackToast.textContent = '수집된 피드백 목록이 클립보드에 복사되었습니다!';
+                feedbackToast.classList.remove('hidden');
+                setTimeout(() => {
+                    feedbackToast.classList.add('hidden');
+                    feedbackToast.textContent = '메시지가 성공적으로 기록되었습니다! 소중한 의견 감사합니다.';
+                }, 2500);
             });
 
             // SIDEBAR TOGGLE EVENT LISTENERS
